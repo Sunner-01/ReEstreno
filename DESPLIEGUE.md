@@ -10,7 +10,7 @@ Un push a `dev` ejecuta 11 pruebas unitarias, 11 de integración y 9 E2E. Un pus
 
 - Una cuenta OCI con permiso para administrar Compute, Networking y objetos del bucket de estado. El bucket debe existir antes del primer push a `main`; puede reutilizarse `terraform-estado-practica` con la clave de estado exclusiva `reestreno/terraform.tfstate`. Activar versionado del bucket para recuperar estados anteriores.
 - Una clave de API OCI PEM, con su usuario OCID y fingerprint registrados en OCI.
-- Un par SSH separado para la VM: clave privada para Actions y clave pública para el metadata de la instancia. Nunca subir la clave privada al repositorio.
+- Un par SSH separado para la VM: ya se generó en `C:\Users\irisc\.ssh\reestreno_oci` (privada) y `C:\Users\irisc\.ssh\reestreno_oci.pub` (pública). Nunca subir la clave privada al repositorio.
 - Dos repositorios Docker Hub **públicos** y un access token con permiso de escritura sobre ellos.
 - Proyecto Supabase Cloud activo. La URL y la clave `anon`/`publishable` son públicas; **no** cargar `service_role` en GitHub Actions ni en imágenes.
 - Para el punto extra Cloudflare: un dominio propio añadido a Cloudflare, una zona activa y un API token con permisos **Zone DNS Edit** y **Zone Settings Edit**. La configuración DNS y Full (strict) se realiza durante el despliegue.
@@ -50,12 +50,12 @@ La clave `SUPABASE_SERVICE_ROLE_KEY` queda solo en el equipo local para seed y p
 
 ## Cómo copiar valores sin mostrarlos en pantalla
 
-En PowerShell, desde `D:\PSIII-Pr\ReEstreno`, sustituir la ruta PEM por la real:
+En PowerShell, desde `D:\PSIII-Pr\ReEstreno`:
 
 ```powershell
-Get-Content 'C:\ruta\a\oci_api_key.pem' -Raw | Set-Clipboard
-Get-Content 'C:\ruta\a\reestreno_ssh' -Raw | Set-Clipboard
-Get-Content 'C:\ruta\a\reestreno_ssh.pub' -Raw | Set-Clipboard
+Get-Content 'C:\Users\irisc\Downloads\bqo3006041@est.univalle.edu-2026-10-26T13_08_34.518Z.pem' -Raw | Set-Clipboard
+Get-Content 'C:\Users\irisc\.ssh\reestreno_oci' -Raw | Set-Clipboard
+Get-Content 'C:\Users\irisc\.ssh\reestreno_oci.pub' -Raw | Set-Clipboard
 ((Get-Content .env | Where-Object { $_ -match '^SUPABASE_URL=' }) -replace '^SUPABASE_URL=', '') | Set-Clipboard
 ((Get-Content .env | Where-Object { $_ -match '^SUPABASE_ANON_KEY=' }) -replace '^SUPABASE_ANON_KEY=', '') | Set-Clipboard
 ```
