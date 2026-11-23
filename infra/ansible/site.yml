@@ -164,3 +164,53 @@
       retries: 12
       delay: 5
       until: web_response.status in [200, 301, 308]
+
+    - name: Comprobar túnel temporal de Cloudflare
+      ansible.builtin.command: docker container inspect reestreno-quick-tunnel
+      register: quick_tunnel_container
+      failed_when: false
+      changed_when: false
+      when: app_domain == ''
+
+    - name: Crear túnel temporal de Cloudflare
+      ansible.builtin.command: >-
+        docker run -d --name reestreno-quick-tunnel --restart unless-stopped
+        --network host cloudflare/cloudflared:latest tunnel --no-autoupdate
+        --url http://127.0.0.1:80
+      when: app_domain == '' and quick_tunnel_container.rc != 0
+
+    - name: Mantener activo el túnel existente
+      ansible.builtin.command: docker start reestreno-quick-tunnel
+      changed_when: false
+      when: app_domain == '' and quick_tunnel_container.rc == 0
+
+    - name: Obtener URL temporal de Cloudflare
+      ansible.builtin.shell: >-
+        docker logs reestreno-quick-tunnel 2>&1 |
+        grep -oE 'https://[a-z0-9-]+[.]trycloudflare[.]com' | tail -n 1
+      register: quick_tunnel_url
+      changed_when: false
+      retries: 20
+      delay: 3
+      until: quick_tunnel_url.stdout | length > 0
+      when: app_domain == ''
+
+    - name: Usar URL temporal en el backend
+      ansible.builtin.lineinfile:
+        path: '{{ app_dir }}/.env'
+        regexp: '^WEB_URL='
+        line: 'WEB_URL={{ quick_tunnel_url.stdout }}'
+        mode: '0600'
+      register: quick_tunnel_backend_url
+      when: app_domain == ''
+
+    - name: Aplicar URL temporal al backend
+      ansible.builtin.command: docker compose up -d --no-deps backend
+      args:
+        chdir: '{{ app_dir }}'
+      when: app_domain == '' and quick_tunnel_backend_url.changed
+
+    - name: Mostrar URL temporal del sitio
+      ansible.builtin.debug:
+        msg: 'ReEstreno: {{ quick_tunnel_url.stdout }}'
+      when: app_domain == ''
