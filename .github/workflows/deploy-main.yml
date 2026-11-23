@@ -19,7 +19,7 @@ jobs:
   publish:
     name: Publicar imágenes en Docker Hub
     needs: tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Descargar código
         uses: actions/checkout@v5
@@ -70,7 +70,7 @@ jobs:
   deploy:
     name: Crear OCI y configurar con Ansible
     needs: publish
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     env:
       TF_IN_AUTOMATION: 'true'
