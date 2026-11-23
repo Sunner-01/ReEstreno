@@ -1,0 +1,8 @@
+{% if app_domain %}
+{{ app_domain }} {
+{% else %}
+:80 {
+{% endif %}
+    encode gzip zstd
+    reverse_proxy frontend:4310
+}

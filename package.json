@@ -1,0 +1,36 @@
+{
+  "name": "reestreno",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "concurrently -k -n API,WEB \"npm run dev -w backend\" \"npm run dev -w frontend\"",
+    "build": "npm run build -w backend && npm run build -w frontend",
+    "typecheck": "npm run typecheck --workspaces",
+    "test:unit": "vitest run --config vitest.config.ts tests/unit",
+    "test:integration": "vitest run --config vitest.config.ts tests/integration",
+    "test:e2e": "playwright test",
+    "test": "npm run test:unit && npm run test:integration && npm run test:e2e",
+    "db:start": "supabase start --exclude realtime,edge-runtime,logflare,vector,supavisor",
+    "db:migrate": "supabase migration up",
+    "format": "prettier --write .",
+    "db:stop": "supabase stop",
+    "local:setup": "node scripts/setup-local.mjs",
+    "seed": "node scripts/seed.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.58.2",
+    "@types/node": "22.15.30",
+    "@types/supertest": "6.0.3",
+    "concurrently": "9.2.1",
+    "dotenv": "17.2.3",
+    "prettier": "3.6.2",
+    "supabase": "3.2.0",
+    "supertest": "7.1.4",
+    "typescript": "5.9.3",
+    "vitest": "3.2.4"
+  }
+}

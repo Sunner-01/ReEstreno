@@ -1,0 +1,24 @@
+{
+  "name": "@reestreno/frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --hostname 127.0.0.1 --port 4310",
+    "build": "next build",
+    "start": "next start --hostname 0.0.0.0 --port 4310",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "16.4.6",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "@supabase/supabase-js": "2.119.2",
+    "lucide-react": "0.468.0",
+    "@fontsource/dm-sans": "5.2.8",
+    "@fontsource/manrope": "5.2.8"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3"
+  }
+}

@@ -1,0 +1,73 @@
+name: ReEstreno - eliminar VM de pago
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmacion:
+        description: Escribe ELIMINAR_REESTRENO para destruir la VM y su red
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: reestreno-production
+  cancel-in-progress: false
+
+jobs:
+  destroy:
+    if: ${{ inputs.confirmacion == 'ELIMINAR_REESTRENO' }}
+    runs-on: ubuntu-latest
+    env:
+      TF_IN_AUTOMATION: 'true'
+      TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
+      TF_VAR_compartment_ocid: ${{ secrets.OCI_COMPARTMENT_OCID }}
+      TF_VAR_user_ocid: ${{ secrets.OCI_USER_OCID }}
+      TF_VAR_fingerprint: ${{ secrets.OCI_FINGERPRINT }}
+      TF_VAR_private_key_path: /home/runner/.oci/api_key.pem
+      TF_VAR_region: ${{ vars.OCI_REGION }}
+      TF_VAR_ssh_public_key: ${{ secrets.OCI_SSH_PUBLIC_KEY }}
+      APP_DOMAIN: ${{ vars.APP_DOMAIN }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Preparar clave OCI
+        env:
+          OCI_API_KEY_PEM: ${{ secrets.OCI_API_KEY_PEM }}
+        run: |
+          install -d -m 700 "$HOME/.oci"
+          printf '%s\n' "$OCI_API_KEY_PEM" > "$HOME/.oci/api_key.pem"
+          chmod 600 "$HOME/.oci/api_key.pem"
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.17.0
+          terraform_wrapper: false
+      - name: Abrir estado remoto
+        working-directory: infra/terraform
+        env:
+          OCI_STATE_BUCKET: ${{ vars.OCI_STATE_BUCKET }}
+          OCI_NAMESPACE: ${{ vars.OCI_NAMESPACE }}
+        run: |
+          terraform init -input=false \
+            -backend-config="bucket=$OCI_STATE_BUCKET" \
+            -backend-config="namespace=$OCI_NAMESPACE" \
+            -backend-config="key=reestreno/terraform.tfstate" \
+            -backend-config="tenancy_ocid=$TF_VAR_tenancy_ocid" \
+            -backend-config="user_ocid=$TF_VAR_user_ocid" \
+            -backend-config="fingerprint=$TF_VAR_fingerprint" \
+            -backend-config="private_key_path=$TF_VAR_private_key_path" \
+            -backend-config="region=$TF_VAR_region"
+      - name: Guardar IP antes de destruir
+        id: vm
+        working-directory: infra/terraform
+        run: echo "ip=$(terraform output -raw public_ip)" >> "$GITHUB_OUTPUT"
+      - name: Destruir VM, VCN y subred
+        working-directory: infra/terraform
+        run: terraform destroy -input=false -auto-approve
+      - name: Quitar DNS si todavía apunta a esa VM
+        if: ${{ vars.APP_DOMAIN != '' }}
+        env:
+          PUBLIC_IP: ${{ steps.vm.outputs.ip }}
+        run: python scripts/cloudflare_dns.py delete
