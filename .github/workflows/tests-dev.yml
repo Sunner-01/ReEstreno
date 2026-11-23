@@ -1,11 +1,7 @@
 name: ReEstreno - pruebas
 on:
-  workflow_call:
   push:
     branches: [dev]
-  pull_request:
-    branches: [dev, main]
-  workflow_dispatch:
 permissions:
   contents: read
 concurrency:

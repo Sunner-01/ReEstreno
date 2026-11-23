@@ -4,7 +4,7 @@
 
 Usar **un repositorio GitHub** llamado `ReEstreno` bajo `Sunner-01`, con ramas `main` y `dev`. Los repositorios Docker Hub `sunner01/reestreno-backend` y `sunner01/reestreno-frontend` se crean automáticamente como públicos en el workflow si no existen. El token Docker Hub debe tener permiso para crearlos y escribir imágenes.
 
-Un push a `dev` ejecuta 11 pruebas unitarias, 11 de integración y 9 E2E. Un push a `main` repite las pruebas, publica ambas imágenes con etiquetas `latest` y SHA del commit, aplica Terraform y despliega por SSH con Ansible. El workflow también admite ejecución manual. La VM utiliza Ubuntu 24.04, 1 OCPU, 2 GB de RAM y la shape **VM.Standard.E5.Flex, de pago**. Seguirá encendida y cobrando hasta que se ejecute `ReEstreno - eliminar VM de pago` en Actions.
+Un push a `dev` ejecuta 11 pruebas unitarias, 11 de integración y 9 E2E. Un push a `main` publica ambas imágenes con etiquetas `latest` y SHA del commit, aplica Terraform y despliega por SSH con Ansible, sin repetir las pruebas. El workflow de despliegue también admite ejecución manual. La VM utiliza Ubuntu 24.04, 1 OCPU, 2 GB de RAM y la shape **VM.Standard.E5.Flex, de pago**. Seguirá encendida y cobrando hasta que se ejecute `ReEstreno - eliminar VM de pago` en Actions.
 
 ## Requisitos previos
 
