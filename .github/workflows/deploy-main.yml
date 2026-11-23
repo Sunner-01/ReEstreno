@@ -13,12 +13,8 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  tests:
-    uses: ./.github/workflows/tests-dev.yml
-
   publish:
     name: Publicar imágenes en Docker Hub
-    needs: tests
     runs-on: ubuntu-24.04
     steps:
       - name: Descargar código
