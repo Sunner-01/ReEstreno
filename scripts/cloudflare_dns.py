@@ -58,6 +58,9 @@ def main():
         else:
             print(f"Cloudflare: no se eliminó ningún registro de {domain}")
         return
+    if stage == "prepare" and record and record["content"] == ip and record.get("proxied"):
+        print(f"Cloudflare: {domain} ya apunta a la VM; se conserva el proxy")
+        return
     desired = {"type": "A", "name": domain, "content": ip, "proxied": stage == "activate", "ttl": 1}
     if stage == "activate":
         api("PATCH", f"/zones/{zone}/settings/ssl", {"value": "strict"})

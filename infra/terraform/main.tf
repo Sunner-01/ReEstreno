@@ -109,6 +109,8 @@ resource "oci_core_instance" "app" {
   }
 
   lifecycle {
+    ignore_changes = [source_details[0].source_id]
+
     precondition {
       condition     = length(data.oci_core_images.ubuntu.images) > 0
       error_message = "OCI no encontró una imagen Ubuntu 24.04 para la shape y región seleccionadas."
