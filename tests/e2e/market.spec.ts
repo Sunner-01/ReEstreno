@@ -151,3 +151,4 @@ test('el catálogo funciona en móvil sin desplazamiento horizontal', async ({ p
     true,
   );
 });
+// Cambio para probar
